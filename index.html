@@ -91,9 +91,10 @@
     <div class="container">
         <h1>亲爱的老婆VickyDu</h1>
         <div class="heart">❤️</div>
-        <p style="font-size:1.3rem; color:#b35d74;">距离你的生日还有……</p>
+        <!-- 给这行文字加个id，方便控制隐藏/显示 -->
+        <p id="countdown-text" style="font-size:1.3rem; color:#b35d74;">距离你的生日还有……</p>
         
-        <div class="countdown">
+        <div class="countdown" id="countdown-blocks">
             <div class="time-block">
                 <div class="time-number" id="days">00</div>
                 <div class="time-label">天</div>
@@ -123,55 +124,72 @@
     <script>
         // ========== 在这里设置你老婆的生日（月份和日期） ==========
         // 注意：月份从0开始计数（0=一月，1=二月，...，11=十二月）
-        // 例如：老婆生日是5月20日，则写成 month = 4, day = 20
-        const birthdayMonth = 2;    // 例如 4 代表五月（因为0是一月）
-        const birthdayDay = 10;      // 日期
-        
-        // 可选：如果你知道年份，也可以设置固定年份（比如2026年）
-        // 但通常我们自动计算下一个即将到来的生日，这样每年都有效。
-        // 下面的代码会自动计算“下一个”生日（如果今年还没过，就用今年；如果过了，就用明年）
-        // =====================================================
+        // 你当前设置的是 month=2, day=10  → 3月10日
+        const birthdayMonth = 2;    // 3月
+        const birthdayDay = 10;      // 10号
 
-        function updateCountdown() {
-            const now = new Date(); // 当前时间
+        function updateDisplay() {
+            const now = new Date();
+            const todayYear = now.getFullYear();
+            const todayMonth = now.getMonth();
+            const todayDate = now.getDate();
 
-            // 今年的生日日期
-            let currentYear = now.getFullYear();
-            let birthdayThisYear = new Date(currentYear, birthdayMonth, birthdayDay);
-            
-            // 如果今年的生日已经过了，就计算明年的生日
-            if (now > birthdayThisYear) {
-                birthdayThisYear = new Date(currentYear + 1, birthdayMonth, birthdayDay);
-            }
+            // 判断今天是不是生日（只比较月、日）
+            const isBirthdayToday = (todayMonth === birthdayMonth && todayDate === birthdayDay);
 
-            // 计算时间差（毫秒）
-            const diffMs = birthdayThisYear - now;
+            // 获取要控制显示/隐藏的元素
+            const countdownText = document.getElementById('countdown-text');
+            const countdownBlocks = document.getElementById('countdown-blocks');
+            const messageDiv = document.getElementById('message');
 
-            // 转换为天、小时、分钟、秒
-            const diffSeconds = Math.floor(diffMs / 1000);
-            const days = Math.floor(diffSeconds / (3600 * 24));
-            const hours = Math.floor((diffSeconds % (3600 * 24)) / 3600);
-            const minutes = Math.floor((diffSeconds % 3600) / 60);
-            const seconds = Math.floor(diffSeconds % 60);
-
-            // 更新页面上的数字（补零到两位）
-            document.getElementById('days').textContent = days.toString().padStart(2, '0');
-            document.getElementById('hours').textContent = hours.toString().padStart(2, '0');
-            document.getElementById('minutes').textContent = minutes.toString().padStart(2, '0');
-            document.getElementById('seconds').textContent = seconds.toString().padStart(2, '0');
-
-            // 如果生日就是今天（差0天），显示特别的祝福语
-            if (days === 0 && hours === 0 && minutes === 0 && seconds === 0) {
-                document.getElementById('message').textContent = "老婆生日快乐！今天你是最美丽的！";
+            if (isBirthdayToday) {
+                // 生日当天：隐藏倒计时相关元素，只显示生日祝福
+                countdownText.style.display = 'none';
+                countdownBlocks.style.display = 'none';
+                messageDiv.textContent = "老婆生日快乐！今天你是最美丽的！";
             } else {
-                document.getElementById('message').textContent = "每一天都在期待着为你庆祝的日子，感谢老婆支持我，包容我。";
+                // 非生日：显示倒计时，并计算下一个生日
+                countdownText.style.display = 'block';
+                countdownBlocks.style.display = 'flex';
+
+                // 确定下一个生日的年份
+                let nextBirthdayYear = todayYear;
+                // 如果今年的生日已过（先比月，再比日），则目标年份为明年
+                if (todayMonth > birthdayMonth || (todayMonth === birthdayMonth && todayDate > birthdayDay)) {
+                    nextBirthdayYear = todayYear + 1;
+                }
+
+                // 下一个生日的零点
+                const nextBirthday = new Date(nextBirthdayYear, birthdayMonth, birthdayDay, 0, 0, 0);
+                const diffMs = nextBirthday - now; // 毫秒差
+
+                // 防御性代码：万一出现负数（极少数边界情况），强行修正为明年
+                if (diffMs < 0) {
+                    // 直接取明年生日重新计算
+                    const fallbackBirthday = new Date(nextBirthdayYear + 1, birthdayMonth, birthdayDay, 0, 0, 0);
+                    diffMs = fallbackBirthday - now;
+                }
+
+                const diffSeconds = Math.floor(diffMs / 1000);
+                const days = Math.floor(diffSeconds / (3600 * 24));
+                const hours = Math.floor((diffSeconds % (3600 * 24)) / 3600);
+                const minutes = Math.floor((diffSeconds % 3600) / 60);
+                const seconds = Math.floor(diffSeconds % 60);
+
+                // 更新数字（补零）
+                document.getElementById('days').textContent = days.toString().padStart(2, '0');
+                document.getElementById('hours').textContent = hours.toString().padStart(2, '0');
+                document.getElementById('minutes').textContent = minutes.toString().padStart(2, '0');
+                document.getElementById('seconds').textContent = seconds.toString().padStart(2, '0');
+
+                // 恢复日常祝福语
+                messageDiv.textContent = "每一天都在期待着为你庆祝的日子，感谢老婆支持我，包容我。";
             }
         }
 
-        // 初始化时立刻更新一次，避免出现空数字
-        updateCountdown();
-        // 每秒更新一次
-        setInterval(updateCountdown, 1000);
+        // 立即执行一次，每秒更新
+        updateDisplay();
+        setInterval(updateDisplay, 1000);
     </script>
 </body>
 </html>
