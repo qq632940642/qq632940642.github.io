@@ -135,7 +135,9 @@
             const todayDate = now.getDate();
 
             // 判断今天是不是生日（只比较月、日）
-            const isBirthdayToday = (todayMonth === birthdayMonth && todayDate === birthdayDay);
+            //const isBirthdayToday = (todayMonth === birthdayMonth && todayDate === birthdayDay);
+			// test 
+			const isBirthdayToday = true
 
             // 获取要控制显示/隐藏的元素
             const countdownText = document.getElementById('countdown-text');
@@ -146,7 +148,7 @@
                 // 生日当天：隐藏倒计时相关元素，只显示生日祝福
                 countdownText.style.display = 'none';
                 countdownBlocks.style.display = 'none';
-                messageDiv.textContent = "老婆生日快乐！今天你是最美丽的！";
+                messageDiv.textContent = "老婆生日快乐！愿你每天平安喜乐，有幸此生有你相伴，永远爱你！";
             } else {
                 // 非生日：显示倒计时，并计算下一个生日
                 countdownText.style.display = 'block';
