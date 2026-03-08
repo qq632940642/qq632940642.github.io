@@ -1,13 +1,177 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>我的GitHub博客</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>给老婆的浪漫倒计时 ❤️ 爱你哦</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #f5f0ff 0%, #fad0d9 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.85);
+            border-radius: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 3rem 2rem;
+            max-width: 800px;
+            width: 90%;
+            backdrop-filter: blur(5px);
+            border: 2px solid #ffb6c1;
+        }
+        h1 {
+            color: #d44e6c;
+            font-size: 2.5rem;
+            margin-top: 0;
+            margin-bottom: 1rem;
+            letter-spacing: 2px;
+        }
+        .heart {
+            font-size: 4rem;
+            margin: 0.5rem 0;
+            animation: heartbeat 1.5s ease-in-out infinite;
+        }
+        @keyframes heartbeat {
+            0% { transform: scale(1); }
+            14% { transform: scale(1.3); }
+            28% { transform: scale(1); }
+            42% { transform: scale(1.3); }
+            70% { transform: scale(1); }
+        }
+        .countdown {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            margin: 2.5rem 0;
+        }
+        .time-block {
+            background: #fff;
+            border-radius: 20px;
+            padding: 1.5rem 1rem;
+            min-width: 100px;
+            box-shadow: 0 10px 20px rgba(209, 71, 103, 0.2);
+            border: 1px solid #ffb6c1;
+        }
+        .time-number {
+            font-size: 4rem;
+            font-weight: bold;
+            color: #d44e6c;
+            line-height: 1.2;
+        }
+        .time-label {
+            font-size: 1.2rem;
+            color: #a65a6b;
+            margin-top: 0.5rem;
+            letter-spacing: 2px;
+        }
+        .message {
+            font-size: 1.5rem;
+            color: #a1445c;
+            margin-top: 2rem;
+            font-style: italic;
+            border-top: 2px dashed #ffb6c1;
+            padding-top: 1.5rem;
+        }
+        .footer {
+            margin-top: 2rem;
+            color: #b36b7a;
+            font-size: 1rem;
+        }
+    </style>
 </head>
 <body>
-    <h1>Hello World！</h1>
-    <p>这是我的第一个GitHub Pages博客页面。</p>
-    <p>今天是我在GitHub写博客的第一天！</p>
-	<p>i love vickydu</p>
+    <div class="container">
+        <h1>亲爱的老婆，</h1>
+        <div class="heart">❤️</div>
+        <p style="font-size:1.3rem; color:#b35d74;">距离你的生日还有……</p>
+        
+        <div class="countdown">
+            <div class="time-block">
+                <div class="time-number" id="days">00</div>
+                <div class="time-label">天</div>
+            </div>
+            <div class="time-block">
+                <div class="time-number" id="hours">00</div>
+                <div class="time-label">小时</div>
+            </div>
+            <div class="time-block">
+                <div class="time-number" id="minutes">00</div>
+                <div class="time-label">分钟</div>
+            </div>
+            <div class="time-block">
+                <div class="time-number" id="seconds">00</div>
+                <div class="time-label">秒</div>
+            </div>
+        </div>
+
+        <div class="message" id="message">
+            每一天都在期待着为你庆祝的日子，感谢老婆支持我，包容我。 ✨
+        </div>
+        <div class="footer">
+            —— 爱你的老公
+        </div>
+    </div>
+
+    <script>
+        // ========== 在这里设置你老婆的生日（月份和日期） ==========
+        // 注意：月份从0开始计数（0=一月，1=二月，...，11=十二月）
+        // 例如：老婆生日是5月20日，则写成 month = 4, day = 20
+        const birthdayMonth = 2;    // 例如 4 代表五月（因为0是一月）
+        const birthdayDay = 10;      // 日期
+        
+        // 可选：如果你知道年份，也可以设置固定年份（比如2026年）
+        // 但通常我们自动计算下一个即将到来的生日，这样每年都有效。
+        // 下面的代码会自动计算“下一个”生日（如果今年还没过，就用今年；如果过了，就用明年）
+        // =====================================================
+
+        function updateCountdown() {
+            const now = new Date(); // 当前时间
+
+            // 今年的生日日期
+            let currentYear = now.getFullYear();
+            let birthdayThisYear = new Date(currentYear, birthdayMonth, birthdayDay);
+            
+            // 如果今年的生日已经过了，就计算明年的生日
+            if (now > birthdayThisYear) {
+                birthdayThisYear = new Date(currentYear + 1, birthdayMonth, birthdayDay);
+            }
+
+            // 计算时间差（毫秒）
+            const diffMs = birthdayThisYear - now;
+
+            // 转换为天、小时、分钟、秒
+            const diffSeconds = Math.floor(diffMs / 1000);
+            const days = Math.floor(diffSeconds / (3600 * 24));
+            const hours = Math.floor((diffSeconds % (3600 * 24)) / 3600);
+            const minutes = Math.floor((diffSeconds % 3600) / 60);
+            const seconds = Math.floor(diffSeconds % 60);
+
+            // 更新页面上的数字（补零到两位）
+            document.getElementById('days').textContent = days.toString().padStart(2, '0');
+            document.getElementById('hours').textContent = hours.toString().padStart(2, '0');
+            document.getElementById('minutes').textContent = minutes.toString().padStart(2, '0');
+            document.getElementById('seconds').textContent = seconds.toString().padStart(2, '0');
+
+            // 如果生日就是今天（差0天），显示特别的祝福语
+            if (days === 0 && hours === 0 && minutes === 0 && seconds === 0) {
+                document.getElementById('message').textContent = "老婆生日快乐！今天你是最美丽的！";
+            } else {
+                document.getElementById('message').textContent = "每一天都在期待着为你庆祝的日子，感谢老婆支持我，包容我。";
+            }
+        }
+
+        // 初始化时立刻更新一次，避免出现空数字
+        updateCountdown();
+        // 每秒更新一次
+        setInterval(updateCountdown, 1000);
+    </script>
 </body>
 </html>
