@@ -4,6 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>给老婆的浪漫倒计时 ❤️ 爱你哦</title>
+	
+	<script>
+        // 这段脚本会在页面加载时检查是否需要刷新
+        (function() {
+            // 从 localStorage 获取上次加载的时间戳
+            var lastVersion = localStorage.getItem('blog_version');
+            var currentVersion = '20240308'; // 你可以随便改个数字，比如今天的日期
+            
+            // 如果没有记录，或者记录和现在不一样，就强制刷新
+            if (!lastVersion || lastVersion !== currentVersion) {
+                localStorage.setItem('blog_version', currentVersion);
+                // 使用 replace 方法刷新，避免产生历史记录
+                window.location.reload(true);
+            }
+        })();
+    </script>
+	
     <style>
         body {
             margin: 0;
