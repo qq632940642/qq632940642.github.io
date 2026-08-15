@@ -3,212 +3,240 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>给老婆的浪漫倒计时 ❤️ 爱你哦</title>
-	
-	<script>
-        // 这段脚本会在页面加载时检查是否需要刷新
-        (function() {
-            // 从 localStorage 获取上次加载的时间戳
-            var lastVersion = localStorage.getItem('blog_version');
-            var currentVersion = '20240308'; // 你可以随便改个数字，比如今天的日期
-            
-            // 如果没有记录，或者记录和现在不一样，就强制刷新
-            if (!lastVersion || lastVersion !== currentVersion) {
-                localStorage.setItem('blog_version', currentVersion);
-                // 使用 replace 方法刷新，避免产生历史记录
-                window.location.reload(true);
-            }
-        })();
-    </script>
-	
+    <title>Xuange2026 的个人主页</title>
     <style>
-        body {
+        * {
             margin: 0;
             padding: 0;
-            font-family: 'Arial', 'Microsoft YaHei', sans-serif;
-            background: linear-gradient(135deg, #f5f0ff 0%, #fad0d9 100%);
-            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            height: 100vh;
             display: flex;
-            justify-content: center;
-            align-items: center;
+            background: #f5f5f5;
+        }
+
+        /* 左侧菜单 */
+        .sidebar {
+            width: 200px;
+            background: #2c3e50;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            box-shadow: 2px 0 8px rgba(0,0,0,0.1);
+        }
+
+        .sidebar h2 {
+            padding: 20px 16px 10px;
+            font-size: 18px;
+            font-weight: 500;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            margin-bottom: 10px;
             text-align: center;
         }
-        .container {
-            background: rgba(255, 255, 255, 0.85);
-            border-radius: 30px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            padding: 3rem 2rem;
-            max-width: 800px;
-            width: 90%;
-            backdrop-filter: blur(5px);
-            border: 2px solid #ffb6c1;
+
+        .menu-list {
+            list-style: none;
+            flex: 1;
+            padding: 0 8px;
         }
-        h1 {
-            color: #d44e6c;
-            font-size: 2.5rem;
-            margin-top: 0;
-            margin-bottom: 1rem;
-            letter-spacing: 2px;
+
+        .menu-item {
+            padding: 12px 16px;
+            margin: 4px 0;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+            color: #ecf0f1;
+            font-size: 15px;
+            word-break: break-all;
         }
-        .heart {
-            font-size: 4rem;
-            margin: 0.5rem 0;
-            animation: heartbeat 1.5s ease-in-out infinite;
+
+        .menu-item:hover {
+            background: rgba(255,255,255,0.15);
         }
-        @keyframes heartbeat {
-            0% { transform: scale(1); }
-            14% { transform: scale(1.3); }
-            28% { transform: scale(1); }
-            42% { transform: scale(1.3); }
-            70% { transform: scale(1); }
+
+        .menu-item.active {
+            background: #3498db;
+            color: white;
+            font-weight: 500;
         }
-        .countdown {
+
+        /* 右侧内容区 */
+        .content {
+            flex: 1;
+            position: relative;
+            background: white;
+        }
+
+        .iframe-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: none;
+        }
+
+        .iframe-container.active {
+            display: block;
+        }
+
+        .placeholder {
             display: flex;
+            align-items: center;
             justify-content: center;
-            gap: 1.5rem;
-            flex-wrap: wrap;
-            margin: 2.5rem 0;
+            height: 100%;
+            color: #95a5a6;
+            font-size: 20px;
         }
-        .time-block {
-            background: #fff;
-            border-radius: 20px;
-            padding: 1.5rem 1rem;
-            min-width: 100px;
-            box-shadow: 0 10px 20px rgba(209, 71, 103, 0.2);
-            border: 1px solid #ffb6c1;
+
+        .placeholder.hidden {
+            display: none;
         }
-        .time-number {
-            font-size: 4rem;
-            font-weight: bold;
-            color: #d44e6c;
-            line-height: 1.2;
+
+        /* 秘密小圆点 */
+        .secret-trigger{
+            position:fixed;
+            bottom:6px;
+            right:6px;
+            width:14px;
+            height:14px;
+            background:#eeeeee;
+            border-radius:50%;
+            z-index:9998;
+            cursor:pointer;
         }
-        .time-label {
-            font-size: 1.2rem;
-            color: #a65a6b;
-            margin-top: 0.5rem;
-            letter-spacing: 2px;
+        .secret-trigger:hover{
+            background:#cccccc;
         }
-        .message {
-            font-size: 1.5rem;
-            color: #a1445c;
-            margin-top: 2rem;
-            font-style: italic;
-            border-top: 2px dashed #ffb6c1;
-            padding-top: 1.5rem;
+
+        /* 全屏遮罩层，用来加载独立love.html */
+        .love-layer{
+            position:fixed;
+            inset:0;
+            z-index:9999;
+            display:none;
         }
-        .footer {
-            margin-top: 2rem;
-            color: #b36b7a;
-            font-size: 1rem;
+        .love-layer.show{
+            display:block;
+        }
+        .love-layer iframe{
+            width:100%;
+            height:100%;
+            border:none;
+        }
+        .love-close{
+            position:fixed;
+            top:12px;
+            right:12px;
+            z-index:10001;
+            background:rgba(255,255,255,0.35);
+            border:1px solid #d44e6c;
+            color:#d44e6c;
+            padding:4px 10px;
+            border-radius:8px;
+            cursor:pointer;
+            font-size:13px;
+        }
+        .love-close:hover{
+            background:rgba(255,255,255,0.7);
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>亲爱的老婆VickyDu</h1>
-        <div class="heart">❤️</div>
-        <!-- 给这行文字加个id，方便控制隐藏/显示 -->
-        <p id="countdown-text" style="font-size:1.3rem; color:#b35d74;">距离你的生日还有……</p>
-        
-        <div class="countdown" id="countdown-blocks">
-            <div class="time-block">
-                <div class="time-number" id="days">00</div>
-                <div class="time-label">天</div>
-            </div>
-            <div class="time-block">
-                <div class="time-number" id="hours">00</div>
-                <div class="time-label">小时</div>
-            </div>
-            <div class="time-block">
-                <div class="time-number" id="minutes">00</div>
-                <div class="time-label">分钟</div>
-            </div>
-            <div class="time-block">
-                <div class="time-number" id="seconds">00</div>
-                <div class="time-label">秒</div>
-            </div>
-        </div>
+    <div class="secret-trigger" id="secretBtn" title="秘密入口"></div>
 
-        <div class="message" id="message">
-            每一天都在期待着为你庆祝的日子，感谢老婆支持我，包容我。 ✨
-        </div>
-        <div class="footer">
-            —— 爱你的DarlingZhou
-        </div>
+    <div class="sidebar">
+        <h2>常用工具</h2>
+        <ul class="menu-list" id="menuList"></ul>
+    </div>
+
+    <div class="content" id="contentArea">
+        <div class="placeholder" id="placeholder">👈 点击左侧菜单打开页面</div>
+    </div>
+
+    <!-- 全屏层：iframe加载独立love.html -->
+    <div class="love-layer" id="loveLayer">
+        <button class="love-close" id="closeLove">← 返回工具页</button>
+        <iframe src="love.html"></iframe>
     </div>
 
     <script>
-        // ========== 在这里设置你老婆的生日（月份和日期） ==========
-        // 注意：月份从0开始计数（0=一月，1=二月，...，11=十二月）
-        // 你当前设置的是 month=2, day=10  → 3月10日
-        const birthdayMonth = 2;    // 3月
-        const birthdayDay = 10;      // 10号
+        (function() {
+            const menuItems = [
+                { name: 'JSON格式化', url: 'https://www.sojson.com/' },
+                { name: '百度', url: 'https://www.baidu.com/' },
+                { name: '必应', url: 'https://www.bing.com/' },
+                { name: '时间戳转换', url: 'https://tool.lu/timestamp/' },
+                {name: '博客', url: 'https://blog.csdn.net/u012116089?type=blog'}
+            ];
 
-        function updateDisplay() {
-            const now = new Date();
-            const todayYear = now.getFullYear();
-            const todayMonth = now.getMonth();
-            const todayDate = now.getDate();
+            const menuList = document.getElementById('menuList');
+            const contentArea = document.getElementById('contentArea');
+            const placeholder = document.getElementById('placeholder');
+            const secretBtn = document.getElementById("secretBtn");
+            const loveLayer = document.getElementById("loveLayer");
+            const closeLove = document.getElementById("closeLove");
 
-            // 判断今天是不是生日（只比较月、日）
-            const isBirthdayToday = (todayMonth === birthdayMonth && todayDate === birthdayDay);
-			// test 
-			//const isBirthdayToday = true
+            const iframeCache = {};
+            let currentActiveIndex = -1;
 
-            // 获取要控制显示/隐藏的元素
-            const countdownText = document.getElementById('countdown-text');
-            const countdownBlocks = document.getElementById('countdown-blocks');
-            const messageDiv = document.getElementById('message');
-
-            if (isBirthdayToday) {
-                // 生日当天：隐藏倒计时相关元素，只显示生日祝福
-                countdownText.style.display = 'none';
-                countdownBlocks.style.display = 'none';
-                messageDiv.textContent = "老婆生日快乐！愿你每天平安喜乐，幸福安康，有幸此生有你相伴，永远爱你！";
-            } else {
-                // 非生日：显示倒计时，并计算下一个生日
-                countdownText.style.display = 'block';
-                countdownBlocks.style.display = 'flex';
-
-                // 确定下一个生日的年份
-                let nextBirthdayYear = todayYear;
-                // 如果今年的生日已过（先比月，再比日），则目标年份为明年
-                if (todayMonth > birthdayMonth || (todayMonth === birthdayMonth && todayDate > birthdayDay)) {
-                    nextBirthdayYear = todayYear + 1;
-                }
-
-                // 下一个生日的零点
-                const nextBirthday = new Date(nextBirthdayYear, birthdayMonth, birthdayDay, 0, 0, 0);
-                const diffMs = nextBirthday - now; // 毫秒差
-
-                // 防御性代码：万一出现负数（极少数边界情况），强行修正为明年
-                if (diffMs < 0) {
-                    // 直接取明年生日重新计算
-                    const fallbackBirthday = new Date(nextBirthdayYear + 1, birthdayMonth, birthdayDay, 0, 0, 0);
-                    diffMs = fallbackBirthday - now;
-                }
-
-                const diffSeconds = Math.floor(diffMs / 1000);
-                const days = Math.floor(diffSeconds / (3600 * 24));
-                const hours = Math.floor((diffSeconds % (3600 * 24)) / 3600);
-                const minutes = Math.floor((diffSeconds % 3600) / 60);
-                const seconds = Math.floor(diffSeconds % 60);
-
-                // 更新数字（补零）
-                document.getElementById('days').textContent = days.toString().padStart(2, '0');
-                document.getElementById('hours').textContent = hours.toString().padStart(2, '0');
-                document.getElementById('minutes').textContent = minutes.toString().padStart(2, '0');
-                document.getElementById('seconds').textContent = seconds.toString().padStart(2, '0');
-
-                // 恢复日常祝福语
-                messageDiv.textContent = "每一天都在期待着为你庆祝的日子，感谢老婆支持我，包容我。";
+            //打开全屏层（只是显示，不跳转页面，主页面状态全部保留）
+            function openLove(){
+                loveLayer.classList.add("show");
             }
-        }
+            function closeLoveFunc(){
+                loveLayer.classList.remove("show");
+            }
 
-        // 立即执行一次，每秒更新
-        updateDisplay();
-        setInterval(updateDisplay, 1000);
+            secretBtn.addEventListener("click", openLove);
+            closeLove.addEventListener("click", closeLoveFunc);
+
+            function renderMenu() {
+                menuItems.forEach((item, index) => {
+                    const li = document.createElement('li');
+                    li.className = 'menu-item';
+                    li.textContent = item.name;
+                    li.dataset.index = index;
+                    li.addEventListener('click', () => switchToMenu(index));
+                    menuList.appendChild(li);
+                });
+            }
+
+            function switchToMenu(index) {
+                if (currentActiveIndex === index) return;
+                const allItems = menuList.querySelectorAll('.menu-item');
+                allItems.forEach(item => item.classList.remove('active'));
+                allItems[index].classList.add('active');
+                placeholder.classList.add('hidden');
+
+                if (currentActiveIndex !== -1) {
+                    const prevIframe = iframeCache[currentActiveIndex];
+                    if (prevIframe) prevIframe.classList.remove('active');
+                }
+                if (!iframeCache[index]) {
+                    createIframe(index);
+                }
+                iframeCache[index].classList.add('active');
+                currentActiveIndex = index;
+            }
+
+            function createIframe(index) {
+                const iframe = document.createElement('iframe');
+                iframe.className = 'iframe-container';
+                iframe.src = menuItems[index].url;
+                iframe.setAttribute('sandbox', 'allow-same-origin allow-scripts allow-popups allow-forms');
+                contentArea.appendChild(iframe);
+                iframeCache[index] = iframe;
+            }
+
+            renderMenu();
+        })();
     </script>
 </body>
 </html>

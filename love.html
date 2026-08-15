@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>浪漫倒计时</title>
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+body{
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  text-align:center;
+  background: linear-gradient(135deg, #f5f0ff 0%, #fad0d9 100%);
+  font-family: system-ui,-apple-system,sans-serif;
+}
+.container {
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 30px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+  padding: 3rem 2rem;
+  max-width: 800px;
+  width:90%;
+  backdrop-filter: blur(8px);
+  border:2px solid #ffb6c1;
+}
+h1 {
+  color:#d44e6c;
+  font-size:2.5rem;
+  margin-bottom:1rem;
+  letter-spacing:2px;
+}
+.heart {
+  font-size:4rem;
+  margin:0.5rem 0;
+  animation: heartbeat 1.5s infinite;
+}
+@keyframes heartbeat {
+  0% {transform:scale(1);}
+  14% {transform:scale(1.3);}
+  28% {transform:scale(1);}
+  42% {transform:scale(1.3);}
+  70% {transform:scale(1);}
+}
+.countdown-wrap{
+  display:flex;
+  justify-content:center;
+  flex-wrap:wrap;
+  gap:1.5rem;
+  margin:2.5rem 0;
+}
+.time-block{
+  background:#fff;
+  border-radius:20px;
+  padding:1.5rem 1rem;
+  min-width:110px;
+  box-shadow:0 10px 20px rgba(209,78,108,0.15);
+  border:1px solid #ffb6c1;
+}
+.num{
+  font-size:3rem;
+  font-weight:bold;
+  color:#d44e6c;
+}
+.label{
+  font-size:1.2rem;
+  color:#a65a72;
+  margin-top:0.4rem;
+}
+.msg{
+  font-size:1.5rem;
+  color:#a1445c;
+  margin-top:2rem;
+  font-style:italic;
+  padding-top:1.5rem;
+  border-top:2px dashed #ffb6c1;
+}
+.footer-text{
+  margin-top:1.5rem;
+  font-size:1rem;
+  color:#b36b7a;
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>亲爱的老婆VickyDu</h1>
+  <div class="heart">❤️</div>
+  <p id="countdown-text" style="font-size:1.3rem;color:#b35d74;">距离你的生日还有……</p>
+  <div class="countdown-wrap" id="countdown-blocks">
+    <div class="time-block">
+      <div class="num" id="days">00</div>
+      <div class="label">天</div>
+    </div>
+    <div class="time-block">
+      <div class="num" id="hours">00</div>
+      <div class="label">时</div>
+    </div>
+    <div class="time-block">
+      <div class="num" id="minutes">00</div>
+      <div class="label">分</div>
+    </div>
+    <div class="time-block">
+      <div class="num" id="seconds">00</div>
+      <div class="label">秒</div>
+    </div>
+  </div>
+  <div class="msg" id="message">
+    每一天都在期待，感谢一路相伴包容。✨
+  </div>
+  <div class="footer-text">
+    ——爱你的DarlingZhou
+  </div>
+</div>
+
+<script>
+// 生日配置：月份0开始，3月=2
+const birthdayMonth = 2;
+const birthdayDay = 10;
+
+const countdownText = document.getElementById('countdown-text');
+const countdownBlocks = document.getElementById('countdown-blocks');
+const messageEl = document.getElementById('message');
+
+function updateDisplay(){
+  const now = new Date();
+  let targetYear = now.getFullYear();
+  let birthday = new Date(targetYear, birthdayMonth, birthdayDay,0,0,0);
+
+  // 如果今年生日已过，则取下一年
+  if(birthday < now){
+    birthday = new Date(targetYear+1, birthdayMonth, birthdayDay,0,0,0);
+  }
+
+  const diffMs = birthday.getTime() - now.getTime();
+
+  if(diffMs <= 0){
+    //生日当天
+    countdownText.textContent = "🎂今天是你的生日！";
+    countdownBlocks.style.display = "none";
+    messageEl.textContent = "老婆生日快乐！愿平安喜乐，万事顺意❤️";
+    return;
+  }else{
+    countdownBlocks.style.display = "flex";
+    countdownText.textContent = "距离你的生日还有……";
+    messageEl.textContent = "每一天都在期待，感谢一路相伴包容。✨";
+  }
+
+  const totalSec = Math.floor(diffMs /1000);
+  const days = Math.floor(totalSec/(3600*24));
+  const hours = Math.floor((totalSec%(3600*24))/3600);
+  const minutes = Math.floor((totalSec%3600)/60);
+  const seconds = totalSec%60;
+
+  document.getElementById('days').textContent = String(days).padStart(2,'0');
+  document.getElementById('hours').textContent = String(hours).padStart(2,'0');
+  document.getElementById('minutes').textContent = String(minutes).padStart(2,'0');
+  document.getElementById('seconds').textContent = String(seconds).padStart(2,'0');
+}
+
+updateDisplay();
+setInterval(updateDisplay,1000);
+</script>
+</body>
+</html>
