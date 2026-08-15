@@ -101,19 +101,19 @@
 
         /* 秘密小圆点 */
         .secret-trigger{
-            position:fixed;
-            bottom:6px;
-            right:6px;
-            width:14px;
-            height:14px;
-            background:#eeeeee;
-            border-radius:50%;
-            z-index:9998;
-            cursor:pointer;
-        }
-        .secret-trigger:hover{
-            background:#cccccc;
-        }
+			position:fixed;
+			bottom:8px;
+			right:8px;
+			width:16px;
+			height:16px;
+			background:#607d8b;  /*改成深灰色，明显可见*/
+			border-radius:50%;
+			z-index:99999; /*拉到极高，确保所有图层最上方*/
+			cursor:pointer;
+		}
+		.secret-trigger:hover{
+			background:#d44e6c; /*悬浮变红，提示可点击*/
+		}
 
         /* 全屏遮罩层，用来加载独立love.html */
         .love-layer{
