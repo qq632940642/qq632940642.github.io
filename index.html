@@ -168,12 +168,25 @@
 
     <script>
         (function() {
+            // allowIframe:true 内部iframe打开；false 新标签页打开
             const menuItems = [
-                { name: 'JSON格式化', url: 'https://www.sojson.com/' },
-                { name: '百度', url: 'https://www.baidu.com/' },
-                { name: '必应', url: 'https://www.bing.com/' },
-                { name: '时间戳转换', url: 'https://tool.lu/timestamp/' },
-                {name: '博客', url: 'https://blog.csdn.net/u012116089?type=blog'}
+                { name: 'JSON格式化', url: 'https://www.sojson.com/', allowIframe: true },
+                { name: '百度', url: 'https://www.baidu.com/', allowIframe: false },
+                { name: '必应', url: 'https://www.bing.com/', allowIframe: false },
+                { name: '时间戳转换', url: 'https://tool.lu/timestamp/', allowIframe: true },
+                {name: '旋哥博客', url: 'https://blog.csdn.net/u012116089?type=blog', allowIframe: false}
+				,{name: 'deepseek', url: 'https://chat.deepseek.com/', allowIframe: false}
+				,{name: '豆包', url: 'https://www.doubao.com/chat', allowIframe: true}
+				,{name: '文心', url: 'https://wenxin.baidu.com/?extParams=%7B%22enter_type%22%3A%22home_operate%22%7D', allowIframe: false}	
+				,{name: '千问', url: 'https://www.qianwen.com/?ch=tongyi_redirect', allowIframe: false}
+				,{name: 'c语言中文网', url: 'https://c.54benniao.com/', allowIframe: true}		
+				,{name: '草料二维码', url: 'https://cli.im/', allowIframe: true}	
+				,{name: '力扣', url: 'https://leetcode.cn/', allowIframe: true}
+				,{name: '牛客', url: 'https://www.nowcoder.com/', allowIframe: true}	
+				,{name: 'base64编解码', url: 'https://base64.us/', allowIframe: true}
+				,{name: '进制转化', url: 'https://tool.oschina.net/hexconvert/', allowIframe: true}
+				,{name: 'gitee', url: 'https://gitee.com/', allowIframe: false}
+				,{name: 'github', url: 'https://github.com/', allowIframe: false}
             ];
 
             const menuList = document.getElementById('menuList');
@@ -186,7 +199,6 @@
             const iframeCache = {};
             let currentActiveIndex = -1;
 
-            //打开全屏层（只是显示，不跳转页面，主页面状态全部保留）
             function openLove(){
                 loveLayer.classList.add("show");
             }
@@ -209,6 +221,14 @@
             }
 
             function switchToMenu(index) {
+                const item = menuItems[index];
+                // 不能iframe，直接新开标签页
+                if(!item.allowIframe){
+                    window.open(item.url, "_blank");
+                    return;
+                }
+
+                // 可以iframe，走原来内部加载逻辑
                 if (currentActiveIndex === index) return;
                 const allItems = menuList.querySelectorAll('.menu-item');
                 allItems.forEach(item => item.classList.remove('active'));
