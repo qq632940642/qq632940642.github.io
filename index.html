@@ -229,8 +229,8 @@
     </div>
     <script>
         (function() {
-            // 分组数据结构：groupName分组名，collapsed初始是否折叠，children子菜单
-            const groups = [
+            // 分组默认配置
+            const defaultGroups = [
                 {
                     groupName:"开发工具",
                     collapsed:false,
@@ -280,6 +280,8 @@
                 }
             ];
 
+            let groups = JSON.parse(JSON.stringify(defaultGroups));
+
             const menuList = document.getElementById('menuList');
             const contentArea = document.getElementById('contentArea');
             const placeholder = document.getElementById('placeholder');
@@ -293,7 +295,47 @@
 
             const iframeCache = {};
             let currentActiveIndex = -1;
-            let flatMenuList = []; //扁平化全部子菜单，用来索引
+            let flatMenuList = [];
+
+            const STORAGE_SIDEBAR = "site_sidebar_state";
+            const STORAGE_GROUP_COLLAPSE = "site_groups_collapse";
+
+            // 读取本地存储，恢复侧边栏状态
+            function loadSidebarState(){
+                const val = localStorage.getItem(STORAGE_SIDEBAR);
+                if(val === "hidden"){
+                    sidebar.classList.add("hidden");
+                    toggleFloat.classList.add("show");
+                }else{
+                    sidebar.classList.remove("hidden");
+                    toggleFloat.classList.remove("show");
+                }
+            }
+            function saveSidebarState(){
+                if(sidebar.classList.contains("hidden")){
+                    localStorage.setItem(STORAGE_SIDEBAR,"hidden");
+                }else{
+                    localStorage.removeItem(STORAGE_SIDEBAR);
+                }
+            }
+
+            // 读取分组折叠状态
+            function loadGroupCollapseState(){
+                const json = localStorage.getItem(STORAGE_GROUP_COLLAPSE);
+                if(!json) return;
+                try{
+                    const saved = JSON.parse(json);
+                    groups.forEach((g,idx)=>{
+                        if(saved[idx] !== undefined){
+                            g.collapsed = saved[idx];
+                        }
+                    });
+                }catch(e){}
+            }
+            function saveGroupCollapseState(){
+                const arr = groups.map(g=>g.collapsed);
+                localStorage.setItem(STORAGE_GROUP_COLLAPSE, JSON.stringify(arr));
+            }
 
             //切换侧边栏显示隐藏
             function toggleSidebar(){
@@ -303,6 +345,7 @@
                 }else{
                     toggleFloat.classList.remove('show');
                 }
+                saveSidebarState();
             }
             toggleInner.addEventListener('click', toggleSidebar);
             toggleFloat.addEventListener('click', toggleSidebar);
@@ -320,7 +363,7 @@
             function renderMenu() {
                 menuList.innerHTML = "";
                 flatMenuList = [];
-                groups.forEach((group)=>{
+                groups.forEach((group, gIdx)=>{
                     const liGroup = document.createElement("li");
 
                     //分组标题
@@ -334,11 +377,12 @@
                     ulChild.className = "group-children";
                     if(group.collapsed) ulChild.classList.add("collapse");
 
-                    //点击分组标题切换折叠
+                    //点击分组标题切换折叠，同时保存到localStorage
                     header.addEventListener("click",()=>{
                         group.collapsed = !group.collapsed;
                         header.classList.toggle("collapsed", group.collapsed);
                         ulChild.classList.toggle("collapse", group.collapsed);
+                        saveGroupCollapseState();
                     });
 
                     //渲染子项
@@ -392,7 +436,10 @@
                 iframeCache[index] = iframe;
             }
 
+            // 顺序：先读存储，再渲染UI
+            loadGroupCollapseState();
             renderMenu();
+            loadSidebarState();
         })();
     </script>
 </body>
