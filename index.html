@@ -10,17 +10,15 @@
             padding: 0;
             box-sizing: border-box;
         }
-
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             height: 100vh;
             display: flex;
             background: #f5f5f5;
         }
-
         /* 左侧菜单 */
         .sidebar {
-            width: 200px;
+            width: 220px;
             background: #2c3e50;
             color: white;
             display: flex;
@@ -28,7 +26,6 @@
             overflow-y: auto;
             box-shadow: 2px 0 8px rgba(0,0,0,0.1);
         }
-
         .sidebar h2 {
             padding: 20px 16px 10px;
             font-size: 18px;
@@ -37,41 +34,61 @@
             margin-bottom: 10px;
             text-align: center;
         }
-
         .menu-list {
             list-style: none;
             flex: 1;
             padding: 0 8px;
         }
-
+        /* 分组标题 */
+        .group-header{
+            padding:10px 12px;
+            margin:6px 0 2px;
+            background:rgba(255,255,255,0.08);
+            border-radius:6px;
+            cursor:pointer;
+            display:flex;
+            align-items:center;
+            font-size:15px;
+        }
+        .group-header .arrow{
+            margin-right:6px;
+            transition: transform 0.2s;
+        }
+        .group-header.collapsed .arrow{
+            transform: rotate(-90deg);
+        }
+        .group-children{
+            list-style:none;
+            overflow:hidden;
+            transition: height 0.24s ease;
+        }
+        .group-children.collapse{
+            height:0 !important;
+        }
         .menu-item {
-            padding: 12px 16px;
-            margin: 4px 0;
+            padding: 10px 14px 10px 26px;
+            margin: 3px 0;
             border-radius: 6px;
             cursor: pointer;
             transition: background 0.2s;
             color: #ecf0f1;
-            font-size: 15px;
+            font-size: 14px;
             word-break: break-all;
         }
-
         .menu-item:hover {
             background: rgba(255,255,255,0.15);
         }
-
         .menu-item.active {
             background: #3498db;
             color: white;
             font-weight: 500;
         }
-
         /* 右侧内容区 */
         .content {
             flex: 1;
             position: relative;
             background: white;
         }
-
         .iframe-container {
             position: absolute;
             top: 0;
@@ -81,11 +98,9 @@
             border: none;
             display: none;
         }
-
         .iframe-container.active {
             display: block;
         }
-
         .placeholder {
             display: flex;
             align-items: center;
@@ -94,11 +109,9 @@
             color: #95a5a6;
             font-size: 20px;
         }
-
         .placeholder.hidden {
             display: none;
         }
-
         /* 秘密小圆点 */
         .secret-trigger{
 			position:fixed;
@@ -106,15 +119,14 @@
 			right:8px;
 			width:16px;
 			height:16px;
-			background:#607d8b;  /*改成深灰色，明显可见*/
+			background:#607d8b;
 			border-radius:50%;
-			z-index:99999; /*拉到极高，确保所有图层最上方*/
+			z-index:99999;
 			cursor:pointer;
 		}
 		.secret-trigger:hover{
-			background:#d44e6c; /*悬浮变红，提示可点击*/
+			background:#d44e6c;
 		}
-
         /* 全屏遮罩层，用来加载独立love.html */
         .love-layer{
             position:fixed;
@@ -150,43 +162,69 @@
 </head>
 <body>
     <div class="secret-trigger" id="secretBtn" title="秘密入口"></div>
-
     <div class="sidebar">
         <h2>常用工具</h2>
         <ul class="menu-list" id="menuList"></ul>
     </div>
-
     <div class="content" id="contentArea">
         <div class="placeholder" id="placeholder">👈 点击左侧菜单打开页面</div>
     </div>
-
     <!-- 全屏层：iframe加载独立love.html -->
     <div class="love-layer" id="loveLayer">
         <button class="love-close" id="closeLove">← 返回工具页</button>
         <iframe src="love.html"></iframe>
     </div>
-
     <script>
         (function() {
-            // allowIframe:true 内部iframe打开；false 新标签页打开
-            const menuItems = [
-                { name: 'JSON格式化', url: 'https://www.sojson.com/', allowIframe: true },
-                { name: '百度', url: 'https://www.baidu.com/', allowIframe: false },
-                { name: '必应', url: 'https://www.bing.com/', allowIframe: false },
-                { name: '时间戳转换', url: 'https://tool.lu/timestamp/', allowIframe: true },
-                {name: '旋哥博客', url: 'https://blog.csdn.net/u012116089?type=blog', allowIframe: false}
-				,{name: 'deepseek', url: 'https://chat.deepseek.com/', allowIframe: false}
-				,{name: '豆包', url: 'https://www.doubao.com/chat', allowIframe: true}
-				,{name: '文心', url: 'https://wenxin.baidu.com/?extParams=%7B%22enter_type%22%3A%22home_operate%22%7D', allowIframe: false}	
-				,{name: '千问', url: 'https://www.qianwen.com/?ch=tongyi_redirect', allowIframe: false}
-				,{name: 'c语言中文网', url: 'https://c.54benniao.com/', allowIframe: true}		
-				,{name: '草料二维码', url: 'https://cli.im/', allowIframe: true}	
-				,{name: '力扣', url: 'https://leetcode.cn/', allowIframe: true}
-				,{name: '牛客', url: 'https://www.nowcoder.com/', allowIframe: true}	
-				,{name: 'base64编解码', url: 'https://base64.us/', allowIframe: true}
-				,{name: '进制转化', url: 'https://tool.oschina.net/hexconvert/', allowIframe: true}
-				,{name: 'gitee', url: 'https://gitee.com/', allowIframe: false}
-				,{name: 'github', url: 'https://github.com/', allowIframe: false}
+            // 分组数据结构：groupName分组名，collapsed初始是否折叠，children子菜单
+            const groups = [
+                {
+                    groupName:"开发工具",
+                    collapsed:false,
+                    children:[
+                        { name: 'JSON格式化', url: 'https://www.sojson.com/', allowIframe: true },
+                        { name: '时间戳转换', url: 'https://tool.lu/timestamp/', allowIframe: true },
+                        {name: 'base64编解码', url: 'https://base64.us/', allowIframe: true},
+                        {name: '进制转化', url: 'https://tool.oschina.net/hexconvert/', allowIframe: true},
+                        {name: '草料二维码', url: 'https://cli.im/', allowIframe: true}
+                    ]
+                },
+                {
+                    groupName:"AI工具",
+                    collapsed:false,
+                    children:[
+                        {name: 'deepseek', url: 'https://chat.deepseek.com/', allowIframe: false},
+                        {name: '豆包', url: 'https://www.doubao.com/chat', allowIframe: true},
+                        {name: '文心', url: 'https://wenxin.baidu.com/?extParams=%7B%22enter_type%22%3A%22home_operate%22%7D', allowIframe: false},
+                        {name: '千问', url: 'https://www.qianwen.com/?ch=tongyi_redirect', allowIframe: false}
+                    ]
+                },
+                {
+                    groupName:"刷题平台",
+                    collapsed:false,
+                    children:[
+                        {name: '力扣', url: 'https://leetcode.cn/', allowIframe: true},
+                        {name: '牛客', url: 'https://www.nowcoder.com/', allowIframe: true}
+                    ]
+                },
+                {
+                    groupName:"搜索&博客",
+                    collapsed:false,
+                    children:[
+                        { name: '百度', url: 'https://www.baidu.com/', allowIframe: false },
+                        { name: '必应', url: 'https://www.bing.com/', allowIframe: false },
+                        {name: '旋哥博客', url: 'https://blog.csdn.net/u012116089?type=blog', allowIframe: false},
+                        {name: 'c语言中文网', url: 'https://c.54benniao.com/', allowIframe: true}
+                    ]
+                },
+                {
+                    groupName:"代码仓库",
+                    collapsed:false,
+                    children:[
+                        {name: 'gitee', url: 'https://gitee.com/', allowIframe: false},
+                        {name: 'github', url: 'https://github.com/', allowIframe: false}
+                    ]
+                }
             ];
 
             const menuList = document.getElementById('menuList');
@@ -198,6 +236,7 @@
 
             const iframeCache = {};
             let currentActiveIndex = -1;
+            let flatMenuList = []; //扁平化全部子菜单，用来索引
 
             function openLove(){
                 loveLayer.classList.add("show");
@@ -205,36 +244,66 @@
             function closeLoveFunc(){
                 loveLayer.classList.remove("show");
             }
-
             secretBtn.addEventListener("click", openLove);
             closeLove.addEventListener("click", closeLoveFunc);
 
+            //渲染分组菜单
             function renderMenu() {
-                menuItems.forEach((item, index) => {
-                    const li = document.createElement('li');
-                    li.className = 'menu-item';
-                    li.textContent = item.name;
-                    li.dataset.index = index;
-                    li.addEventListener('click', () => switchToMenu(index));
-                    menuList.appendChild(li);
+                menuList.innerHTML = "";
+                flatMenuList = [];
+                // 修复：forEach第一个是group对象，第二个才是下标
+                groups.forEach((group)=>{
+                    const liGroup = document.createElement("li");
+
+                    //分组标题
+                    const header = document.createElement("div");
+                    header.className = "group-header";
+                    if(group.collapsed) header.classList.add("collapsed");
+                    header.innerHTML = `<span class="arrow">▼</span><span>${group.groupName}</span>`;
+
+                    //子菜单容器
+                    const ulChild = document.createElement("ul");
+                    ulChild.className = "group-children";
+                    if(group.collapsed) ulChild.classList.add("collapse");
+
+                    //点击分组标题切换折叠
+                    header.addEventListener("click",()=>{
+                        group.collapsed = !group.collapsed;
+                        header.classList.toggle("collapsed", group.collapsed);
+                        ulChild.classList.toggle("collapse", group.collapsed);
+                    });
+
+                    //渲染子项
+                    group.children.forEach(childItem=>{
+                        const idx = flatMenuList.length;
+                        flatMenuList.push(childItem);
+                        const li = document.createElement("li");
+                        li.className = "menu-item";
+                        li.textContent = childItem.name;
+                        li.dataset.index = idx;
+                        li.addEventListener('click', () => switchToMenu(idx));
+                        ulChild.appendChild(li);
+                    });
+
+                    liGroup.appendChild(header);
+                    liGroup.appendChild(ulChild);
+                    menuList.appendChild(liGroup);
                 });
             }
 
             function switchToMenu(index) {
-                const item = menuItems[index];
-                // 不能iframe，直接新开标签页
+                const item = flatMenuList[index];
                 if(!item.allowIframe){
                     window.open(item.url, "_blank");
                     return;
                 }
-
-                // 可以iframe，走原来内部加载逻辑
                 if (currentActiveIndex === index) return;
-                const allItems = menuList.querySelectorAll('.menu-item');
-                allItems.forEach(item => item.classList.remove('active'));
-                allItems[index].classList.add('active');
-                placeholder.classList.add('hidden');
 
+                const allItems = menuList.querySelectorAll('.menu-item');
+                allItems.forEach(el => el.classList.remove('active'));
+                allItems[index].classList.add('active');
+
+                placeholder.classList.add('hidden');
                 if (currentActiveIndex !== -1) {
                     const prevIframe = iframeCache[currentActiveIndex];
                     if (prevIframe) prevIframe.classList.remove('active');
@@ -249,7 +318,7 @@
             function createIframe(index) {
                 const iframe = document.createElement('iframe');
                 iframe.className = 'iframe-container';
-                iframe.src = menuItems[index].url;
+                iframe.src = flatMenuList[index].url;
                 iframe.setAttribute('sandbox', 'allow-same-origin allow-scripts allow-popups allow-forms');
                 contentArea.appendChild(iframe);
                 iframeCache[index] = iframe;
