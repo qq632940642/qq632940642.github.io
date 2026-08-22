@@ -15,6 +15,7 @@
             height: 100vh;
             display: flex;
             background: #f5f5f5;
+            overflow: hidden;
         }
         /* 左侧菜单 */
         .sidebar {
@@ -25,6 +26,12 @@
             flex-direction: column;
             overflow-y: auto;
             box-shadow: 2px 0 8px rgba(0,0,0,0.1);
+            transition: width 0.3s ease;
+            position: relative;
+        }
+        .sidebar.hidden {
+            width: 0;
+            overflow: hidden;
         }
         .sidebar h2 {
             padding: 20px 16px 10px;
@@ -33,6 +40,46 @@
             border-bottom: 1px solid rgba(255,255,255,0.2);
             margin-bottom: 10px;
             text-align: center;
+        }
+        /* 侧边栏内部收缩按钮 */
+        .toggle-sidebar-inner{
+            position:absolute;
+            top:12px;
+            right:8px;
+            width:24px;
+            height:24px;
+            background:rgba(255,255,255,0.12);
+            border:none;
+            color:#fff;
+            border-radius:4px;
+            cursor:pointer;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+        }
+        .toggle-sidebar-inner:hover{
+            background:rgba(255,255,255,0.22);
+        }
+        /* 侧边栏收起之后，悬浮在页面左侧的恢复按钮 */
+        .toggle-sidebar-float{
+            position:fixed;
+            left:0;
+            top:50%;
+            transform:translateY(-50%);
+            width:28px;
+            height:60px;
+            background:#2c3e50;
+            color:white;
+            border:none;
+            border-radius:0 6px 6px 0;
+            cursor:pointer;
+            display:none;
+            z-index:999;
+        }
+        .toggle-sidebar-float.show{
+            display:flex;
+            align-items:center;
+            justify-content:center;
         }
         .menu-list {
             list-style: none;
@@ -162,10 +209,16 @@
 </head>
 <body>
     <div class="secret-trigger" id="secretBtn" title="秘密入口"></div>
-    <div class="sidebar">
+
+    <div class="sidebar" id="sidebar">
+        <button class="toggle-sidebar-inner" id="toggleInner">◀</button>
         <h2>常用工具</h2>
         <ul class="menu-list" id="menuList"></ul>
     </div>
+
+    <!-- 侧边栏收起后悬浮按钮 -->
+    <button class="toggle-sidebar-float" id="toggleFloat">▶</button>
+
     <div class="content" id="contentArea">
         <div class="placeholder" id="placeholder">👈 点击左侧菜单打开页面</div>
     </div>
@@ -234,9 +287,25 @@
             const loveLayer = document.getElementById("loveLayer");
             const closeLove = document.getElementById("closeLove");
 
+            const sidebar = document.getElementById('sidebar');
+            const toggleInner = document.getElementById('toggleInner');
+            const toggleFloat = document.getElementById('toggleFloat');
+
             const iframeCache = {};
             let currentActiveIndex = -1;
             let flatMenuList = []; //扁平化全部子菜单，用来索引
+
+            //切换侧边栏显示隐藏
+            function toggleSidebar(){
+                sidebar.classList.toggle('hidden');
+                if(sidebar.classList.contains('hidden')){
+                    toggleFloat.classList.add('show');
+                }else{
+                    toggleFloat.classList.remove('show');
+                }
+            }
+            toggleInner.addEventListener('click', toggleSidebar);
+            toggleFloat.addEventListener('click', toggleSidebar);
 
             function openLove(){
                 loveLayer.classList.add("show");
@@ -251,7 +320,6 @@
             function renderMenu() {
                 menuList.innerHTML = "";
                 flatMenuList = [];
-                // 修复：forEach第一个是group对象，第二个才是下标
                 groups.forEach((group)=>{
                     const liGroup = document.createElement("li");
 
