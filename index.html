@@ -234,48 +234,53 @@
                 {
                     groupName:"开发工具",
                     collapsed:false,
+                    lastGroupClickTs: null,
                     children:[
-                        { name: 'JSON格式化', url: 'https://www.sojson.com/', allowIframe: true },
-                        { name: '时间戳转换', url: 'https://tool.lu/timestamp/', allowIframe: true },
-                        {name: 'base64编解码', url: 'https://base64.us/', allowIframe: true},
-                        {name: '进制转化', url: 'https://tool.oschina.net/hexconvert/', allowIframe: true},
-                        {name: '草料二维码', url: 'https://cli.im/', allowIframe: true}
+                        { name: 'JSON格式化', url: 'https://www.sojson.com/', allowIframe: true, lastClickTs:null },
+                        { name: '时间戳转换', url: 'https://tool.lu/timestamp/', allowIframe: true, lastClickTs:null },
+                        {name: 'base64编解码', url: 'https://base64.us/', allowIframe: true, lastClickTs:null},
+                        {name: '进制转化', url: 'https://tool.oschina.net/hexconvert/', allowIframe: true, lastClickTs:null},
+                        {name: '草料二维码', url: 'https://cli.im/', allowIframe: true, lastClickTs:null}
                     ]
                 },
                 {
                     groupName:"AI工具",
                     collapsed:false,
+                    lastGroupClickTs: null,
                     children:[
-                        {name: 'deepseek', url: 'https://chat.deepseek.com/', allowIframe: false},
-                        {name: '豆包', url: 'https://www.doubao.com/chat', allowIframe: true},
-                        {name: '文心', url: 'https://wenxin.baidu.com/?extParams=%7B%22enter_type%22%3A%22home_operate%22%7D', allowIframe: false},
-                        {name: '千问', url: 'https://www.qianwen.com/?ch=tongyi_redirect', allowIframe: false}
+                        {name: 'deepseek', url: 'https://chat.deepseek.com/', allowIframe: false, lastClickTs:null},
+                        {name: '豆包', url: 'https://www.doubao.com/chat', allowIframe: true, lastClickTs:null},
+                        {name: '文心', url: 'https://wenxin.baidu.com/?extParams=%7B%22enter_type%22%3A%22home_operate%22%7D', allowIframe: false, lastClickTs:null},
+                        {name: '千问', url: 'https://www.qianwen.com/?ch=tongyi_redirect', allowIframe: false, lastClickTs:null}
                     ]
                 },
                 {
                     groupName:"刷题平台",
                     collapsed:false,
+                    lastGroupClickTs: null,
                     children:[
-                        {name: '力扣', url: 'https://leetcode.cn/', allowIframe: true},
-                        {name: '牛客', url: 'https://www.nowcoder.com/', allowIframe: true}
+                        {name: '力扣', url: 'https://leetcode.cn/', allowIframe: true, lastClickTs:null},
+                        {name: '牛客', url: 'https://www.nowcoder.com/', allowIframe: true, lastClickTs:null}
                     ]
                 },
                 {
                     groupName:"搜索&博客",
                     collapsed:false,
+                    lastGroupClickTs: null,
                     children:[
-                        { name: '百度', url: 'https://www.baidu.com/', allowIframe: false },
-                        { name: '必应', url: 'https://www.bing.com/', allowIframe: false },
-                        {name: '旋哥博客', url: 'https://blog.csdn.net/u012116089?type=blog', allowIframe: false},
-                        {name: 'c语言中文网', url: 'https://c.54benniao.com/', allowIframe: true}
+                        { name: '百度', url: 'https://www.baidu.com/', allowIframe: false, lastClickTs:null },
+                        { name: '必应', url: 'https://www.bing.com/', allowIframe: false, lastClickTs:null },
+                        {name: '旋哥博客', url: 'https://blog.csdn.net/u012116089?type=blog', allowIframe: false, lastClickTs:null},
+                        {name: 'c语言中文网', url: 'https://c.54benniao.com/', allowIframe: true, lastClickTs:null}
                     ]
                 },
                 {
                     groupName:"代码仓库",
                     collapsed:false,
+                    lastGroupClickTs: null,
                     children:[
-                        {name: 'gitee', url: 'https://gitee.com/', allowIframe: false},
-                        {name: 'github', url: 'https://github.com/', allowIframe: false}
+                        {name: 'gitee', url: 'https://gitee.com/', allowIframe: false, lastClickTs:null},
+                        {name: 'github', url: 'https://github.com/', allowIframe: false, lastClickTs:null}
                     ]
                 }
             ];
@@ -299,6 +304,7 @@
 
             const STORAGE_SIDEBAR = "site_sidebar_state";
             const STORAGE_GROUP_COLLAPSE = "site_groups_collapse";
+            const STORAGE_CLICK_RECORD = "site_click_record";
 
             // 读取本地存储，恢复侧边栏状态
             function loadSidebarState(){
@@ -337,6 +343,37 @@
                 localStorage.setItem(STORAGE_GROUP_COLLAPSE, JSON.stringify(arr));
             }
 
+            // 加载点击时间记录
+            function loadClickRecord(){
+                const raw = localStorage.getItem(STORAGE_CLICK_RECORD);
+                if(!raw) return;
+                try{
+                    const rec = JSON.parse(raw);
+                    groups.forEach((g,gIdx)=>{
+                        if(rec.groupTs && rec.groupTs[gIdx] !== undefined){
+                            g.lastGroupClickTs = rec.groupTs[gIdx];
+                        }
+                        g.children.forEach((child,cIdx)=>{
+                            const key = `${gIdx}_${cIdx}`;
+                            if(rec.childTs && rec.childTs[key]!==undefined){
+                                child.lastClickTs = rec.childTs[key];
+                            }
+                        })
+                    })
+                }catch(e){}
+            }
+            function saveClickRecord(){
+                const groupTs = {};
+                const childTs = {};
+                groups.forEach((g,gIdx)=>{
+                    groupTs[gIdx] = g.lastGroupClickTs;
+                    g.children.forEach((child,cIdx)=>{
+                        childTs[`${gIdx}_${cIdx}`] = child.lastClickTs;
+                    })
+                })
+                localStorage.setItem(STORAGE_CLICK_RECORD, JSON.stringify({groupTs,childTs}));
+            }
+
             //切换侧边栏显示隐藏
             function toggleSidebar(){
                 sidebar.classList.toggle('hidden');
@@ -359,25 +396,52 @@
             secretBtn.addEventListener("click", openLove);
             closeLove.addEventListener("click", closeLoveFunc);
 
+
+            /**
+             * 排序逻辑：仅初始化渲染时执行
+             * 1.分组：按 lastGroupClickTs 降序，null放后面
+             * 2.分组内部子项：按 lastClickTs 降序，null放后面
+             */
+            function getSortedGroups(){
+                const sortedGroups = [...groups].sort((a,b)=>{
+                    const ta = a.lastGroupClickTs;
+                    const tb = b.lastGroupClickTs;
+                    if(ta===null && tb===null) return 0;
+                    if(ta===null) return 1;
+                    if(tb===null) return -1;
+                    return tb - ta;
+                });
+                sortedGroups.forEach(g=>{
+                    g.children.sort((a,b)=>{
+                        const ta = a.lastClickTs;
+                        const tb = b.lastClickTs;
+                        if(ta===null && tb===null) return 0;
+                        if(ta===null) return 1;
+                        if(tb===null) return -1;
+                        return tb - ta;
+                    })
+                })
+                return sortedGroups;
+            }
+
             //渲染分组菜单
             function renderMenu() {
                 menuList.innerHTML = "";
                 flatMenuList = [];
-                groups.forEach((group, gIdx)=>{
+                const sortedGroups = getSortedGroups();
+
+                sortedGroups.forEach((group)=>{
                     const liGroup = document.createElement("li");
 
-                    //分组标题
                     const header = document.createElement("div");
                     header.className = "group-header";
                     if(group.collapsed) header.classList.add("collapsed");
                     header.innerHTML = `<span class="arrow">▼</span><span>${group.groupName}</span>`;
 
-                    //子菜单容器
                     const ulChild = document.createElement("ul");
                     ulChild.className = "group-children";
                     if(group.collapsed) ulChild.classList.add("collapse");
 
-                    //点击分组标题切换折叠，同时保存到localStorage
                     header.addEventListener("click",()=>{
                         group.collapsed = !group.collapsed;
                         header.classList.toggle("collapsed", group.collapsed);
@@ -385,7 +449,6 @@
                         saveGroupCollapseState();
                     });
 
-                    //渲染子项
                     group.children.forEach(childItem=>{
                         const idx = flatMenuList.length;
                         flatMenuList.push(childItem);
@@ -393,7 +456,14 @@
                         li.className = "menu-item";
                         li.textContent = childItem.name;
                         li.dataset.index = idx;
-                        li.addEventListener('click', () => switchToMenu(idx));
+                        li.addEventListener('click', () => {
+                            // 只记录时间，不即时重排，刷新页面才生效
+                            const now = Date.now();
+                            childItem.lastClickTs = now;
+                            group.lastGroupClickTs = now;
+                            saveClickRecord();
+                            switchToMenu(idx);
+                        });
                         ulChild.appendChild(li);
                     });
 
@@ -436,8 +506,9 @@
                 iframeCache[index] = iframe;
             }
 
-            // 顺序：先读存储，再渲染UI
+            // 初始化
             loadGroupCollapseState();
+            loadClickRecord();
             renderMenu();
             loadSidebarState();
         })();
