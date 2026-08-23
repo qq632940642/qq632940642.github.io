@@ -41,7 +41,6 @@
             margin-bottom: 10px;
             text-align: center;
         }
-        /* 侧边栏内部收缩按钮 */
         .toggle-sidebar-inner{
             position:absolute;
             top:12px;
@@ -60,7 +59,6 @@
         .toggle-sidebar-inner:hover{
             background:rgba(255,255,255,0.22);
         }
-        /* 侧边栏收起之后，悬浮在页面左侧的恢复按钮 */
         .toggle-sidebar-float{
             position:fixed;
             left:0;
@@ -86,7 +84,6 @@
             flex: 1;
             padding: 0 8px;
         }
-        /* 分组标题 */
         .group-header{
             padding:10px 12px;
             margin:6px 0 2px;
@@ -130,7 +127,6 @@
             color: white;
             font-weight: 500;
         }
-        /* 右侧内容区 */
         .content {
             flex: 1;
             position: relative;
@@ -159,7 +155,6 @@
         .placeholder.hidden {
             display: none;
         }
-        /* 秘密小圆点 */
         .secret-trigger{
 			position:fixed;
 			bottom:8px;
@@ -174,7 +169,6 @@
 		.secret-trigger:hover{
 			background:#d44e6c;
 		}
-        /* 全屏遮罩层，用来加载独立love.html */
         .love-layer{
             position:fixed;
             inset:0;
@@ -205,42 +199,146 @@
         .love-close:hover{
             background:rgba(255,255,255,0.7);
         }
+
+        /* ====菜单编辑按钮与弹窗==== */
+        .sidebar-header-row{
+			display:flex;
+			justify-content:space‑between;
+			align-items:center;
+			padding:12px 8px 0 8px;
+		}
+		.sidebar-edit-btn{
+			background:rgba(255,255,255,0.15);
+			border:none;
+			color:#fff;
+			border-radius:4px;
+			padding:3px 8px;
+			font-size:12px;
+			cursor:pointer;
+		}
+		.sidebar-edit-btn:hover{
+			background:rgba(255,255,255,0.28);
+		}
+        .edit-modal{
+            position:fixed;
+            inset:0;
+            background:rgba(0,0,0,0.55);
+            z-index:100000;
+            display:none;
+            align-items:center;
+            justify-content:center;
+        }
+        .edit-modal.show{
+            display:flex;
+        }
+        .edit-panel{
+            width:920px;
+            max-height:85vh;
+            background:#fff;
+            border-radius:10px;
+            overflow:hidden;
+            display:flex;
+            flex-direction:column;
+        }
+        .edit-header{
+            padding:14px 18px;
+            background:#2c3e50;
+            color:#fff;
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+        }
+        .edit-body{
+            flex:1;
+            overflow:auto;
+            padding:16px;
+        }
+        .edit-footer{
+            padding:12px 18px;
+            border-top:1px solid #ddd;
+            display:flex;
+            gap:10px;
+            justify-content:flex-end;
+        }
+        .group-edit-block{
+            border:1px solid #ccc;
+            margin-bottom:14px;
+            border-radius:6px;
+            padding:12px;
+        }
+        .child-edit-item{
+            border:1px solid #eee;
+            padding:10px;
+            margin:8px 0;
+            border-radius:4px;
+            display:flex;
+            gap:8px;
+            align-items:center;
+            flex-wrap:wrap;
+        }
+        input,select{
+            padding:4px 6px;
+            font-size:13px;
+        }
+        button{
+            padding:4px 8px;
+            font-size:13px;
+            cursor:pointer;
+        }
     </style>
 </head>
 <body>
     <div class="secret-trigger" id="secretBtn" title="秘密入口"></div>
 
     <div class="sidebar" id="sidebar">
-        <button class="toggle-sidebar-inner" id="toggleInner">◀</button>
-        <h2>常用工具</h2>
-        <ul class="menu-list" id="menuList"></ul>
-    </div>
+		<div class="sidebar-header-row">
+			<button class="toggle-sidebar-inner" id="toggleInner">◀</button>
+			<button class="sidebar-edit-btn" id="openEditBtn">编辑</button>
+		</div>
+		<h2>常用工具</h2>
+		<ul class="menu-list" id="menuList"></ul>
+	</div>
 
-    <!-- 侧边栏收起后悬浮按钮 -->
     <button class="toggle-sidebar-float" id="toggleFloat">▶</button>
 
     <div class="content" id="contentArea">
         <div class="placeholder" id="placeholder">👈 点击左侧菜单打开页面</div>
     </div>
-    <!-- 全屏层：iframe加载独立love.html -->
+
     <div class="love-layer" id="loveLayer">
         <button class="love-close" id="closeLove">← 返回工具页</button>
         <iframe src="love.html"></iframe>
     </div>
+
+    <!-- 编辑弹窗 -->
+    <div class="edit-modal" id="editModal">
+        <div class="edit-panel">
+            <div class="edit-header">
+                <span>菜单编辑（内置+本地新增）</span>
+            </div>
+            <div class="edit-body" id="editBody"></div>
+            <div class="edit-footer">
+                <button id="resetDefaultBtn">恢复默认菜单</button>
+                <button id="cancelEditBtn">取消</button>
+                <button id="saveEditBtn">保存并应用</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         (function() {
-            // 分组默认配置
+            // 原始内置菜单，只读，不会被修改
             const defaultGroups = [
                 {
                     groupName:"开发工具",
                     collapsed:false,
                     lastGroupClickTs: null,
                     children:[
-                        { name: 'JSON格式化', url: 'https://www.sojson.com/', allowIframe: true, lastClickTs:null },
-                        { name: '时间戳转换', url: 'https://tool.lu/timestamp/', allowIframe: true, lastClickTs:null },
-                        {name: 'base64编解码', url: 'https://base64.us/', allowIframe: true, lastClickTs:null},
-                        {name: '进制转化', url: 'https://tool.oschina.net/hexconvert/', allowIframe: true, lastClickTs:null},
-                        {name: '草料二维码', url: 'https://cli.im/', allowIframe: true, lastClickTs:null}
+                        { name: 'JSON格式化', url: 'https://www.sojson.com/', allowIframe: true, lastClickTs:null, hidden:false },
+                        { name: '时间戳转换', url: 'https://tool.lu/timestamp/', allowIframe: true, lastClickTs:null, hidden:false },
+                        {name: 'base64编解码', url: 'https://base64.us/', allowIframe: true, lastClickTs:null, hidden:false},
+                        {name: '进制转化', url: 'https://tool.oschina.net/hexconvert/', allowIframe: true, lastClickTs:null, hidden:false},
+                        {name: '草料二维码', url: 'https://cli.im/', allowIframe: true, lastClickTs:null, hidden:false}
                     ]
                 },
                 {
@@ -248,10 +346,10 @@
                     collapsed:false,
                     lastGroupClickTs: null,
                     children:[
-                        {name: 'deepseek', url: 'https://chat.deepseek.com/', allowIframe: false, lastClickTs:null},
-                        {name: '豆包', url: 'https://www.doubao.com/chat', allowIframe: true, lastClickTs:null},
-                        {name: '文心', url: 'https://wenxin.baidu.com/?extParams=%7B%22enter_type%22%3A%22home_operate%22%7D', allowIframe: false, lastClickTs:null},
-                        {name: '千问', url: 'https://www.qianwen.com/?ch=tongyi_redirect', allowIframe: false, lastClickTs:null}
+                        {name: 'deepseek', url: 'https://chat.deepseek.com/', allowIframe: false, lastClickTs:null, hidden:false},
+                        {name: '豆包', url: 'https://www.doubao.com/chat', allowIframe: true, lastClickTs:null, hidden:false},
+                        {name: '文心', url: 'https://wenxin.baidu.com/?extParams=%7B%22enter_type%22%3A%22home_operate%22%7D', allowIframe: false, lastClickTs:null, hidden:false},
+                        {name: '千问', url: 'https://www.qianwen.com/?ch=tongyi_redirect', allowIframe: false, lastClickTs:null, hidden:false}
                     ]
                 },
                 {
@@ -259,8 +357,8 @@
                     collapsed:false,
                     lastGroupClickTs: null,
                     children:[
-                        {name: '力扣', url: 'https://leetcode.cn/', allowIframe: true, lastClickTs:null},
-                        {name: '牛客', url: 'https://www.nowcoder.com/', allowIframe: true, lastClickTs:null}
+                        {name: '力扣', url: 'https://leetcode.cn/', allowIframe: true, lastClickTs:null, hidden:false},
+                        {name: '牛客', url: 'https://www.nowcoder.com/', allowIframe: true, lastClickTs:null, hidden:false}
                     ]
                 },
                 {
@@ -268,10 +366,10 @@
                     collapsed:false,
                     lastGroupClickTs: null,
                     children:[
-                        { name: '百度', url: 'https://www.baidu.com/', allowIframe: false, lastClickTs:null },
-                        { name: '必应', url: 'https://www.bing.com/', allowIframe: false, lastClickTs:null },
-                        {name: '旋哥博客', url: 'https://blog.csdn.net/u012116089?type=blog', allowIframe: false, lastClickTs:null},
-                        {name: 'c语言中文网', url: 'https://c.54benniao.com/', allowIframe: true, lastClickTs:null}
+                        { name: '百度', url: 'https://www.baidu.com/', allowIframe: false, lastClickTs:null, hidden:false },
+                        { name: '必应', url: 'https://www.bing.com/', allowIframe: false, lastClickTs:null, hidden:false },
+                        {name: '旋哥博客', url: 'https://blog.csdn.net/u012116089?type=blog', allowIframe: false, lastClickTs:null, hidden:false},
+                        {name: 'c语言中文网', url: 'https://c.54benniao.com/', allowIframe: true, lastClickTs:null, hidden:false}
                     ]
                 },
                 {
@@ -279,13 +377,29 @@
                     collapsed:false,
                     lastGroupClickTs: null,
                     children:[
-                        {name: 'gitee', url: 'https://gitee.com/', allowIframe: false, lastClickTs:null},
-                        {name: 'github', url: 'https://github.com/', allowIframe: false, lastClickTs:null}
+                        {name: 'gitee', url: 'https://gitee.com/', allowIframe: false, lastClickTs:null, hidden:false},
+                        {name: 'github', url: 'https://github.com/', allowIframe: false, lastClickTs:null, hidden:false}
                     ]
                 }
             ];
 
-            let groups = JSON.parse(JSON.stringify(defaultGroups));
+            const STORAGE_USER_GROUPS = "site_user_groups";
+            const STORAGE_SIDEBAR = "site_sidebar_state";
+            const STORAGE_GROUP_COLLAPSE = "site_groups_collapse";
+            const STORAGE_CLICK_RECORD = "site_click_record";
+
+            // 运行时使用的菜单数据
+            let groups;
+
+            // 初始化：优先读取用户自定义配置，没有就拷贝默认
+            function initGroups(){
+                const userRaw = localStorage.getItem(STORAGE_USER_GROUPS);
+                if(userRaw){
+                    groups = JSON.parse(userRaw);
+                }else{
+                    groups = JSON.parse(JSON.stringify(defaultGroups));
+                }
+            }
 
             const menuList = document.getElementById('menuList');
             const contentArea = document.getElementById('contentArea');
@@ -293,20 +407,21 @@
             const secretBtn = document.getElementById("secretBtn");
             const loveLayer = document.getElementById("loveLayer");
             const closeLove = document.getElementById("closeLove");
-
             const sidebar = document.getElementById('sidebar');
             const toggleInner = document.getElementById('toggleInner');
             const toggleFloat = document.getElementById('toggleFloat');
+
+            const openEditBtn = document.getElementById("openEditBtn");
+            const editModal = document.getElementById("editModal");
+            const editBody = document.getElementById("editBody");
+            const cancelEditBtn = document.getElementById("cancelEditBtn");
+            const saveEditBtn = document.getElementById("saveEditBtn");
+            const resetDefaultBtn = document.getElementById("resetDefaultBtn");
 
             const iframeCache = {};
             let currentActiveIndex = -1;
             let flatMenuList = [];
 
-            const STORAGE_SIDEBAR = "site_sidebar_state";
-            const STORAGE_GROUP_COLLAPSE = "site_groups_collapse";
-            const STORAGE_CLICK_RECORD = "site_click_record";
-
-            // 读取本地存储，恢复侧边栏状态
             function loadSidebarState(){
                 const val = localStorage.getItem(STORAGE_SIDEBAR);
                 if(val === "hidden"){
@@ -325,7 +440,6 @@
                 }
             }
 
-            // 读取分组折叠状态
             function loadGroupCollapseState(){
                 const json = localStorage.getItem(STORAGE_GROUP_COLLAPSE);
                 if(!json) return;
@@ -343,7 +457,6 @@
                 localStorage.setItem(STORAGE_GROUP_COLLAPSE, JSON.stringify(arr));
             }
 
-            // 加载点击时间记录
             function loadClickRecord(){
                 const raw = localStorage.getItem(STORAGE_CLICK_RECORD);
                 if(!raw) return;
@@ -374,7 +487,6 @@
                 localStorage.setItem(STORAGE_CLICK_RECORD, JSON.stringify({groupTs,childTs}));
             }
 
-            //切换侧边栏显示隐藏
             function toggleSidebar(){
                 sidebar.classList.toggle('hidden');
                 if(sidebar.classList.contains('hidden')){
@@ -387,57 +499,43 @@
             toggleInner.addEventListener('click', toggleSidebar);
             toggleFloat.addEventListener('click', toggleSidebar);
 
-            function openLove(){
-                loveLayer.classList.add("show");
-            }
-            function closeLoveFunc(){
-                loveLayer.classList.remove("show");
-            }
+            function openLove(){ loveLayer.classList.add("show"); }
+            function closeLoveFunc(){ loveLayer.classList.remove("show"); }
             secretBtn.addEventListener("click", openLove);
             closeLove.addEventListener("click", closeLoveFunc);
 
-
-            /**
-             * 排序逻辑：仅初始化渲染时执行
-             * 1.分组：按 lastGroupClickTs 降序，null放后面
-             * 2.分组内部子项：按 lastClickTs 降序，null放后面
-             */
             function getSortedGroups(){
                 const sortedGroups = [...groups].sort((a,b)=>{
                     const ta = a.lastGroupClickTs;
                     const tb = b.lastGroupClickTs;
-                    if(ta===null && tb===null) return 0;
-                    if(ta===null) return 1;
-                    if(tb===null) return -1;
+                    if(ta === null && tb === null) return 0;
+                    if(ta === null) return 1;
+                    if(tb === null) return -1;
                     return tb - ta;
                 });
                 sortedGroups.forEach(g=>{
                     g.children.sort((a,b)=>{
                         const ta = a.lastClickTs;
                         const tb = b.lastClickTs;
-                        if(ta===null && tb===null) return 0;
-                        if(ta===null) return 1;
-                        if(tb===null) return -1;
+                        if(ta === null && tb === null) return 0;
+                        if(ta === null) return 1;
+                        if(tb === null) return -1;
                         return tb - ta;
                     })
                 })
                 return sortedGroups;
             }
 
-            //渲染分组菜单
             function renderMenu() {
                 menuList.innerHTML = "";
                 flatMenuList = [];
                 const sortedGroups = getSortedGroups();
-
                 sortedGroups.forEach((group)=>{
                     const liGroup = document.createElement("li");
-
                     const header = document.createElement("div");
                     header.className = "group-header";
                     if(group.collapsed) header.classList.add("collapsed");
                     header.innerHTML = `<span class="arrow">▼</span><span>${group.groupName}</span>`;
-
                     const ulChild = document.createElement("ul");
                     ulChild.className = "group-children";
                     if(group.collapsed) ulChild.classList.add("collapse");
@@ -449,7 +547,9 @@
                         saveGroupCollapseState();
                     });
 
+                    // ✅ 渲染时跳过 hidden=true 的菜单
                     group.children.forEach(childItem=>{
+                        if(childItem.hidden === true) return;
                         const idx = flatMenuList.length;
                         flatMenuList.push(childItem);
                         const li = document.createElement("li");
@@ -457,7 +557,6 @@
                         li.textContent = childItem.name;
                         li.dataset.index = idx;
                         li.addEventListener('click', () => {
-                            // 只记录时间，不即时重排，刷新页面才生效
                             const now = Date.now();
                             childItem.lastClickTs = now;
                             group.lastGroupClickTs = now;
@@ -480,23 +579,18 @@
                     return;
                 }
                 if (currentActiveIndex === index) return;
-
                 const allItems = menuList.querySelectorAll('.menu-item');
                 allItems.forEach(el => el.classList.remove('active'));
                 allItems[index].classList.add('active');
-
                 placeholder.classList.add('hidden');
                 if (currentActiveIndex !== -1) {
                     const prevIframe = iframeCache[currentActiveIndex];
                     if (prevIframe) prevIframe.classList.remove('active');
                 }
-                if (!iframeCache[index]) {
-                    createIframe(index);
-                }
+                if (!iframeCache[index]) createIframe(index);
                 iframeCache[index].classList.add('active');
                 currentActiveIndex = index;
             }
-
             function createIframe(index) {
                 const iframe = document.createElement('iframe');
                 iframe.className = 'iframe-container';
@@ -506,7 +600,164 @@
                 iframeCache[index] = iframe;
             }
 
-            // 初始化
+            // ========== 菜单编辑弹窗逻辑 ==========
+            let editCopy = null;
+
+            // 打开编辑弹窗，深拷贝当前groups用于编辑
+            function openEditModal(){
+                editCopy = JSON.parse(JSON.stringify(groups));
+                renderEditPanel();
+                editModal.classList.add("show");
+            }
+            function closeEditModal(){
+                editModal.classList.remove("show");
+                editCopy = null;
+            }
+
+            // 渲染编辑面板
+            function renderEditPanel(){
+                editBody.innerHTML = "";
+                editCopy.forEach((g, gIdx)=>{
+                    const gBlock = document.createElement("div");
+                    gBlock.className = "group-edit-block";
+                    gBlock.innerHTML = `
+                        <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
+                            <label>分组名称:</label>
+                            <input class="gname" value="${g.groupName}" data-g="${gIdx}">
+                            <button class="addChildBtn" data-g="${gIdx}">新增子菜单</button>
+                            <button class="delGroupBtn" data-g="${gIdx}">删除此分组</button>
+                        </div>
+                        <div class="childListWrap" data-g="${gIdx}"></div>
+                    `;
+                    editBody.appendChild(gBlock);
+
+                    const childWrap = gBlock.querySelector(".childListWrap");
+                    g.children.forEach((child,cIdx)=>{
+                        const div = document.createElement("div");
+                        div.className = "child-edit-item";
+                        div.innerHTML = `
+                            <label>名称:</label><input class="cname" value="${child.name}" data-g="${gIdx}" data-c="${cIdx}">
+                            <label>Url:</label><input class="curl" style="width:260px;" value="${child.url}" data-g="${gIdx}" data-c="${cIdx}">
+                            <label>iframe:</label>
+                            <select class="ciframe" data-g="${gIdx}" data-c="${cIdx}">
+                                <option value="true" ${child.allowIframe?"selected":""}>允许iframe</option>
+                                <option value="false" ${!child.allowIframe?"selected":""}>新标签打开</option>
+                            </select>
+                            <label>隐藏:</label>
+                            <input type="checkbox" class="chidden" ${child.hidden?"checked":""} data-g="${gIdx}" data-c="${cIdx}">
+                            <button class="delChildBtn" data-g="${gIdx}" data-c="${cIdx}">删除</button>
+                        `;
+                        childWrap.appendChild(div);
+                    })
+                });
+                // 新增分组按钮
+                const addGroupBtn = document.createElement("button");
+                addGroupBtn.textContent = "新增分组";
+                addGroupBtn.style.marginTop="10px";
+                addGroupBtn.addEventListener("click",()=>{
+                    editCopy.push({
+                        groupName:"新分组",
+                        collapsed:false,
+                        lastGroupClickTs:null,
+                        children:[]
+                    });
+                    renderEditPanel();
+                });
+                editBody.appendChild(addGroupBtn);
+
+                // 绑定编辑面板内部按钮事件（事件委托）
+                editBody.querySelectorAll(".addChildBtn").forEach(btn=>{
+                    btn.onclick = ()=>{
+                        const gi = Number(btn.dataset.g);
+                        editCopy[gi].children.push({
+                            name:"新菜单",
+                            url:"https://",
+                            allowIframe:true,
+                            lastClickTs:null,
+                            hidden:false
+                        });
+                        renderEditPanel();
+                    }
+                });
+                editBody.querySelectorAll(".delGroupBtn").forEach(btn=>{
+                    btn.onclick = ()=>{
+                        const gi = Number(btn.dataset.g);
+                        editCopy.splice(gi,1);
+                        renderEditPanel();
+                    }
+                });
+                editBody.querySelectorAll(".delChildBtn").forEach(btn=>{
+                    btn.onclick = ()=>{
+                        const gi = Number(btn.dataset.g);
+                        const ci = Number(btn.dataset.c);
+                        editCopy[gi].children.splice(ci,1);
+                        renderEditPanel();
+                    }
+                })
+            }
+
+			function saveEdit(){
+				// 记录当前正在打开的菜单对象（渲染之前保存引用）
+				let activeItem = null;
+				if(currentActiveIndex !== -1 && flatMenuList[currentActiveIndex]){
+					activeItem = flatMenuList[currentActiveIndex];
+				}
+
+				// 把输入框的值同步到editCopy对象
+				editCopy.forEach((g,gIdx)=>{
+					const gnameInput = editBody.querySelector(`.gname[data-g="${gIdx}"]`);
+					g.groupName = gnameInput.value.trim()||"未命名分组";
+					g.children.forEach((child,cIdx)=>{
+						const cname = editBody.querySelector(`.cname[data-g="${gIdx}"][data-c="${cIdx}"]`);
+						const curl = editBody.querySelector(`.curl[data-g="${gIdx}"][data-c="${cIdx}"]`);
+						const ciframe = editBody.querySelector(`.ciframe[data-g="${gIdx}"][data-c="${cIdx}"]`);
+						const chidden = editBody.querySelector(`.chidden[data-g="${gIdx}"][data-c="${cIdx}"]`);
+						child.name = cname.value.trim()||"未命名";
+						child.url = curl.value.trim();
+						child.allowIframe = ciframe.value === "true";
+						child.hidden = chidden.checked;
+					})
+				})
+				// 存入用户配置
+				localStorage.setItem(STORAGE_USER_GROUPS, JSON.stringify(editCopy));
+				// 重新加载运行时groups，重新渲染页面
+				groups = JSON.parse(JSON.stringify(editCopy));
+				renderMenu();
+
+				// 修复：如果原来打开的菜单现在被隐藏，就关闭右侧
+				if(activeItem){
+					const stillExist = flatMenuList.some(item => item === activeItem);
+					if(!stillExist){
+						// 被隐藏了，关闭iframe
+						if(iframeCache[currentActiveIndex]){
+							iframeCache[currentActiveIndex].classList.remove("active");
+						}
+						placeholder.classList.remove("hidden");
+						currentActiveIndex = -1;
+					}
+				}
+
+				closeEditModal();
+			}
+
+
+
+            // 恢复默认菜单：清除用户自定义配置
+            function resetToDefault(){
+                if(!confirm("确定恢复默认？所有新增/修改菜单会丢失。")) return;
+                localStorage.removeItem(STORAGE_USER_GROUPS);
+                initGroups();
+                renderMenu();
+                closeEditModal();
+            }
+
+            openEditBtn.addEventListener("click", openEditModal);
+            cancelEditBtn.addEventListener("click", closeEditModal);
+            saveEditBtn.addEventListener("click", saveEdit);
+            resetDefaultBtn.addEventListener("click", resetToDefault);
+
+            // 页面初始化流程
+            initGroups();
             loadGroupCollapseState();
             loadClickRecord();
             renderMenu();
