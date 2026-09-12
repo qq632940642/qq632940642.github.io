@@ -689,17 +689,32 @@
                 });
                 editBody.querySelectorAll(".delGroupBtn").forEach(btn=>{
                     btn.onclick = ()=>{
-                        const gi = Number(btn.dataset.g);
-                        editCopy.splice(gi,1);
-                        renderEditPanel();
+                        //const gi = Number(btn.dataset.g);
+                        //editCopy.splice(gi,1);
+                        //renderEditPanel();
+						
+						const gIdx = Number(btn.dataset.g);
+						if (!confirm("确定要删除整个分组吗？分组内全部菜单都会被删除！")) {
+							return;
+						}
+						editCopy.splice(gIdx,1);
+						renderEditPanel();
                     }
                 });
                 editBody.querySelectorAll(".delChildBtn").forEach(btn=>{
                     btn.onclick = ()=>{
-                        const gi = Number(btn.dataset.g);
-                        const ci = Number(btn.dataset.c);
-                        editCopy[gi].children.splice(ci,1);
-                        renderEditPanel();
+                        //const gi = Number(btn.dataset.g);
+                        //const ci = Number(btn.dataset.c);
+                        //editCopy[gi].children.splice(ci,1);
+                        //renderEditPanel();
+						
+						const gIdx = Number(btn.dataset.g);
+						const cIdx = Number(btn.dataset.c);
+						if (!confirm("确定删除这条菜单吗？")) {
+							return;
+						}
+						editCopy[gIdx].children.splice(cIdx,1);
+						renderEditPanel();
                     }
                 })
             }
