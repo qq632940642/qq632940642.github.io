@@ -204,6 +204,7 @@
 			display:flex;
 			justify-content:space‑between;
 			align-items:center;
+			gap:6px;
 			padding:12px 8px 0 8px;
 		}
 		.sidebar-edit-btn{
@@ -218,6 +219,90 @@
 		.sidebar-edit-btn:hover{
 			background:rgba(255,255,255,0.28);
 		}
+        /* ====菜单搜索弹窗==== */
+        .search-modal{
+            position:fixed;
+            inset:0;
+            background:rgba(0,0,0,0.45);
+            z-index:100000;
+            display:none;
+            align-items:flex-start;
+            justify-content:center;
+            padding-top:15vh;
+        }
+        .search-modal.show{
+            display:flex;
+        }
+        .search-panel{
+            width:520px;
+            max-width:calc(100vw - 32px);
+            max-height:60vh;
+            background:#fff;
+            border-radius:10px;
+            overflow:hidden;
+            display:flex;
+            flex-direction:column;
+            box-shadow:0 12px 32px rgba(0,0,0,0.25);
+        }
+        .search-header{
+            display:flex;
+            align-items:center;
+            gap:8px;
+            padding:12px 14px;
+            border-bottom:1px solid #eee;
+        }
+        .search-input{
+            flex:1;
+            padding:8px 10px;
+            font-size:14px;
+            border:1px solid #ddd;
+            border-radius:6px;
+            outline:none;
+        }
+        .search-input:focus{
+            border-color:#3498db;
+        }
+        .search-close-btn{
+            background:none;
+            border:none;
+            font-size:18px;
+            line-height:1;
+            color:#888;
+            cursor:pointer;
+        }
+        .search-close-btn:hover{
+            color:#333;
+        }
+        .search-results{
+            flex:1;
+            overflow:auto;
+            padding:8px;
+        }
+        .search-result-item{
+            padding:10px 12px;
+            border-radius:6px;
+            cursor:pointer;
+            display:flex;
+            flex-direction:column;
+            gap:2px;
+        }
+        .search-result-item:hover{
+            background:#f0f6fb;
+        }
+        .search-result-name{
+            font-size:14px;
+            color:#2c3e50;
+        }
+        .search-result-group{
+            font-size:12px;
+            color:#95a5a6;
+        }
+        .search-empty{
+            padding:24px;
+            text-align:center;
+            color:#95a5a6;
+            font-size:13px;
+        }
         .edit-modal{
             position:fixed;
             inset:0;
@@ -291,6 +376,7 @@
     <div class="sidebar" id="sidebar">
 		<div class="sidebar-header-row">
 			<button class="toggle-sidebar-inner" id="toggleInner">◀</button>
+			<button class="sidebar-edit-btn" id="openSearchBtn">搜索</button>
 			<button class="sidebar-edit-btn" id="openEditBtn">编辑</button>
 		</div>
 		<h2>常用工具</h2>
@@ -316,6 +402,16 @@
                 <button id="cancelEditBtn">取消</button>
                 <button id="saveEditBtn">保存并应用</button>
             </div>
+        </div>
+    </div>
+    <!-- 搜索弹窗 -->
+    <div class="search-modal" id="searchModal">
+        <div class="search-panel">
+            <div class="search-header">
+                <input class="search-input" id="searchInput" placeholder="输入菜单名称搜索…">
+                <button class="search-close-btn" id="closeSearchBtn">✕</button>
+            </div>
+            <div class="search-results" id="searchResults"></div>
         </div>
     </div>
     <script>
@@ -772,6 +868,81 @@
             cancelEditBtn.addEventListener("click", closeEditModal);
             saveEditBtn.addEventListener("click", saveEdit);
             resetDefaultBtn.addEventListener("click", resetToDefault);
+            // ========== 菜单搜索弹窗逻辑 ==========
+            const openSearchBtn = document.getElementById("openSearchBtn");
+            const searchModal = document.getElementById("searchModal");
+            const searchInput = document.getElementById("searchInput");
+            const searchResults = document.getElementById("searchResults");
+            const closeSearchBtn = document.getElementById("closeSearchBtn");
+            function openSearchModal(){
+                searchModal.classList.add("show");
+                searchInput.value = "";
+                renderSearchResults("");
+                searchInput.focus();
+            }
+            function closeSearchModal(){
+                searchModal.classList.remove("show");
+            }
+            // 根据关键字过滤菜单，输入为空时显示全部（不含隐藏项）
+            function renderSearchResults(keyword){
+                const kw = keyword.trim().toLowerCase();
+                searchResults.innerHTML = "";
+                const matched = [];
+                groups.forEach(g=>{
+                    g.children.forEach(child=>{
+                        if(child.hidden === true) return;
+                        if(kw && !child.name.toLowerCase().includes(kw)) return;
+                        matched.push({group:g, child:child});
+                    });
+                });
+                if(matched.length === 0){
+                    const empty = document.createElement("div");
+                    empty.className = "search-empty";
+                    empty.textContent = "没有找到匹配的菜单";
+                    searchResults.appendChild(empty);
+                    return;
+                }
+                matched.forEach(({group, child})=>{
+                    const item = document.createElement("div");
+                    item.className = "search-result-item";
+                    const nameEl = document.createElement("span");
+                    nameEl.className = "search-result-name";
+                    nameEl.textContent = child.name;
+                    const groupEl = document.createElement("span");
+                    groupEl.className = "search-result-group";
+                    groupEl.textContent = group.groupName;
+                    item.appendChild(nameEl);
+                    item.appendChild(groupEl);
+                    item.addEventListener("click", ()=>jumpToMenu(child, group));
+                    searchResults.appendChild(item);
+                });
+            }
+            // 点击搜索结果：展开分组并打开对应菜单
+            function jumpToMenu(child, group){
+                if(group.collapsed){
+                    group.collapsed = false;
+                    saveGroupCollapseState();
+                    renderMenu();
+                }
+                const index = flatMenuList.indexOf(child);
+                if(index === -1) return;
+                closeSearchModal();
+                switchToMenu(index);
+            }
+            openSearchBtn.addEventListener("click", openSearchModal);
+            closeSearchBtn.addEventListener("click", closeSearchModal);
+            searchModal.addEventListener("click", (e)=>{
+                if(e.target === searchModal) closeSearchModal();
+            });
+            searchInput.addEventListener("input", ()=>renderSearchResults(searchInput.value));
+            searchInput.addEventListener("keydown", (e)=>{
+                if(e.key === "Escape"){
+                    closeSearchModal();
+                }else if(e.key === "Enter"){
+                    const first = searchResults.querySelector(".search-result-item");
+                    if(first) first.click();
+                }
+            });
             // 页面初始化流程
             initGroups();
             loadGroupCollapseState();
